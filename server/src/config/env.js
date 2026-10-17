@@ -10,6 +10,20 @@ const envSchema = z.object({
   CLIENT_ORIGIN: z.string().default('http://localhost:5173'),
   BODY_LIMIT: z.string().default('1mb'),
   API_PREFIX: z.string().default('/api/v1'),
+  MONGODB_URI: z.string().min(1, 'MONGODB_URI must be provided in server environment').default('mongodb://localhost:27017/shivshree_agro_mart'),
+
+  // JWT configuration
+  JWT_ACCESS_SECRET: z.string().min(16).default('shivshree_agro_mart_default_jwt_access_secret_key_32_chars!'),
+  JWT_REFRESH_SECRET: z.string().min(16).default('shivshree_agro_mart_default_jwt_refresh_secret_key_32_chars!'),
+  JWT_ACCESS_EXPIRES_IN: z.string().default('15m'),
+  JWT_REFRESH_EXPIRES_IN: z.string().default('7d'),
+
+  // Rate limiting for auth routes (15 minutes window, 10 attempts by default)
+  AUTH_RATE_LIMIT_WINDOW_MS: z.string().default('900000').transform((val) => parseInt(val, 10)),
+  AUTH_RATE_LIMIT_MAX_REQUESTS: z.string().default('10').transform((val) => parseInt(val, 10)),
+
+  // Development-only testing helpers (Strictly forbidden in production)
+  DEV_ALLOW_TEST_OTP: z.string().default('true').transform((val) => val === 'true'),
 });
 
 const parsedEnv = envSchema.safeParse(process.env);
@@ -20,4 +34,20 @@ if (!parsedEnv.success) {
   process.exit(1);
 }
 
+// In production, enforce that dev test OTP is strictly disabled
+if (parsedEnv.data.NODE_ENV === 'production' && parsedEnv.data.DEV_ALLOW_TEST_OTP) {
+  console.error('❌ FATAL: DEV_ALLOW_TEST_OTP cannot be enabled in production environment!');
+  process.exit(1);
+}
+
 export const env = parsedEnv.data;
+
+/**
+ * Sanitizes a MongoDB connection URI to mask credentials for safe logging
+ * @param {string} uri
+ * @returns {string} Sanitized URI
+ */
+export function sanitizeMongoUri(uri) {
+  if (!uri || typeof uri !== 'string') return '[empty]';
+  return uri.replace(/(mongodb(?:\+srv)?:\/\/[^:]+:)([^@]+)(@.+)/i, '$1*****$3');
+}

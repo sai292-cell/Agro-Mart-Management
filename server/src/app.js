@@ -1,6 +1,7 @@
 import express from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
 import { env } from './config/env.js';
 import apiRouter from './routes/index.js';
 import { notFoundHandler, errorHandler } from './middleware/errorHandler.js';
@@ -28,9 +29,10 @@ app.use(
   })
 );
 
-// Body parsing with configurable limit
+// Body and cookie parsing
 app.use(express.json({ limit: env.BODY_LIMIT }));
 app.use(express.urlencoded({ extended: true, limit: env.BODY_LIMIT }));
+app.use(cookieParser());
 
 // Versioned API routes
 app.use(env.API_PREFIX, apiRouter);

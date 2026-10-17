@@ -75,13 +75,22 @@ flowchart TD
   - Accurate schema types: money stored in integer paise or high-precision Decimal128, quantities with unit enums (kg, liter, bag, piece).
   - Indexes configured for performance within free-tier RAM limits.
 
-### Phase 4: Authentication, RBAC & Security Boundaries
-- **Goals**: Secure JWT authentication with HTTP-only cookies/headers, password hashing via bcrypt, role-based access control (`owner`, `staff`, `customer`).
-- **Deliverables**: Auth controller, token issuance, refresh token flow, role verification middlewares (`requireRole`, `requireSelfOrAdmin`).
+### Phase 4: Authentication, RBAC & Security Boundaries - [COMPLETED]
+- **Goals**: Secure JWT authentication with HTTP-only cookies, password hashing via bcrypt (cost factor 12), role-based access control (`OWNER`, `MANAGER`, `CASHIER`, `CUSTOMER`).
+- **Deliverables**:
+  - Auth controller (`/api/v1/auth/login`, `/api/v1/auth/logout`, `/api/v1/auth/refresh`, `/api/v1/auth/me`).
+  - Customer OTP request & verification flow (`/api/v1/auth/customer/login-request`, `/verify-otp`).
+  - Refresh token rotation with SHA-256 token hashing and MongoDB TTL auto-cleanup.
+  - Staff management controller (`/api/v1/staff`) restricted strictly to Owner, with immutable audit logging.
+  - One-time owner provisioning CLI script (`server/src/scripts/provisionOwner.js`).
+  - Authorization middlewares (`requireAuth`, `requireRole`, `requireSameShop`, `requireCustomerSelf`).
+  - Rate limiting via `express-rate-limit` on authentication endpoints.
+  - Frontend authentication context, in-memory access token storage, silent refresh, and role-protected routes (`/admin/dashboard`, `/customer/dashboard`).
 - **Acceptance Criteria**:
   - Customers cannot access any internal management route.
-  - Staff cannot query supplier purchase prices or store profit margins.
-  - Passwords hashed with cost factor >= 10.
+  - Staff cannot query supplier purchase prices, profit margins, or promote themselves/others to OWNER.
+  - Passwords hashed with cost factor 12; tokens never stored in localStorage.
+  - 40/40 tests passing across 18 test suites.
 
 ### Phase 5: Product Catalog & Batch/Expiry Inventory Management
 - **Goals**: Comprehensive agro product categorization (seeds, fertilizers, pesticides, tools), batch number tracking, manufacturing/expiry date tracking, stock alerts.
