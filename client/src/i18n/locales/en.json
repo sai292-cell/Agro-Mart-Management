@@ -1,0 +1,102 @@
+{
+  "brand": {
+    "name": "Shivshree Agro Mart",
+    "location": "Maharashtra, India",
+    "tagline": "Trusted Agro-Retail & Farm Supply Management Operating System",
+    "badge": "AgroShop OS v1.0"
+  },
+  "nav": {
+    "home": "Home",
+    "ownerPortal": "Owner Portal",
+    "customerPortal": "Farmer Portal",
+    "language": "Language",
+    "english": "English",
+    "marathi": "मराठी"
+  },
+  "landing": {
+    "welcome": "Welcome to Shivshree Agro Mart",
+    "heroTitle": "Smart Retail Operations for Modern Agriculture",
+    "heroSubtitle": "Seamlessly managing seeds, fertilizers, crop protection, udhaari credit ledgers, and farmer relationships.",
+    "selectPortal": "Select Your Dedicated Portal to Continue",
+    "apiStatus": "Backend Service Status",
+    "features": {
+      "billing": "Fast POS Counter Billing",
+      "inventory": "Batch & Expiry Tracking",
+      "ledger": "Farmer Credit (Khaata) Ledger",
+      "bilingual": "Marathi & English Support"
+    }
+  },
+  "portals": {
+    "owner": {
+      "badge": "Management & Staff",
+      "title": "Shop Owner & Staff Portal",
+      "subtitle": "Restricted to authorized mart operators",
+      "description": "Counter POS billing, batch-wise inventory (seeds, fertilizers, pesticides), supplier invoices, farmer credit ledger, and profit analytics.",
+      "button": "Access Owner Portal",
+      "features": [
+        "Cash, UPI & Credit Split Billing",
+        "Pesticide & Seed Expiry Alerts",
+        "Supplier Purchase & Cost Management",
+        "Detailed Profit & Loss Statements"
+      ]
+    },
+    "customer": {
+      "badge": "Farmer Self-Service",
+      "title": "Farmer / Customer Portal",
+      "subtitle": "For registered farmers and retail buyers",
+      "description": "Self-service passbook to view your historical bills, outstanding credit (khaata) balance, verified payment receipts, and in-stock farm supplies.",
+      "button": "Access Farmer Portal",
+      "features": [
+        "Personal Digital Khaata Passbook",
+        "Download Invoices & GST Receipts",
+        "Track Payment History",
+        "Strictly Sandboxed to Your Account"
+      ]
+    }
+  },
+  "placeholder": {
+    "ownerLogin": {
+      "title": "Shop Owner & Staff Login",
+      "badge": "Security Clearance: Management",
+      "notice": "Authentication system is scheduled for Milestone 4.",
+      "description": "This route serves as the access point for the Shop Owner and authorized counter staff. Role-based JWT security and session encryption will be activated in the upcoming milestone.",
+      "backButton": "Return to Portal Selection",
+      "plannedFeaturesTitle": "What will be enabled here:",
+      "plannedItems": [
+        "Secure credential-based owner/staff login",
+        "Separate permission levels for counter staff vs owner",
+        "Session timeout and audit trail registration"
+      ]
+    },
+    "customerLogin": {
+      "title": "Farmer & Customer Portal Login",
+      "badge": "Farmer Self-Service",
+      "notice": "Customer authentication is scheduled for Milestone 4.",
+      "description": "This route will allow registered farmers to log in using their registered mobile number to securely view their own purchase history and credit balance without access to any internal store financials.",
+      "backButton": "Return to Portal Selection",
+      "plannedFeaturesTitle": "What will be enabled here:",
+      "plannedItems": [
+        "Mobile number and OTP verification",
+        "Zero-leakage data isolation (customers only see their own records)",
+        "Instant WhatsApp bill retrieval option"
+      ]
+    }
+  },
+  "api": {
+    "checking": "Checking API...",
+    "operational": "API Operational (Port 5000)",
+    "offline": "API Offline (Unreachable)",
+    "retry": "Retry Connection"
+  },
+  "notFound": {
+    "title": "Page Not Found",
+    "description": "The page you requested does not exist or has been moved.",
+    "button": "Back to Home"
+  },
+  "footer": {
+    "copyright": "© 2026 Shivshree Agro Mart. All rights reserved.",
+    "tagline": "Empowering Maharashtra's Agricultural Commerce",
+    "systemStatus": "System Health",
+    "secureNote": "Protected by Role-Based Access Architecture"
+  }
+}

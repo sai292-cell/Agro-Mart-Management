@@ -1,0 +1,26 @@
+@import "tailwindcss";
+
+@theme {
+  --color-agro-primary: #166534;
+  --color-agro-secondary: #15803d;
+  --color-agro-dark: #14532d;
+  --color-agro-light: #f0fdf4;
+  --color-agro-accent: #22c55e;
+
+  --font-sans: 'Inter', 'Noto Sans Devanagari', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Base custom styles */
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  background-color: #f8faf8;
+  color: #0f172a;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Custom focus ring for accessibility */
+button:focus-visible, a:focus-visible, input:focus-visible {
+  outline: 2px solid #166534;
+  outline-offset: 2px;
+}
