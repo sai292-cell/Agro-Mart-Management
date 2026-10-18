@@ -48,3 +48,6 @@ Thumbs.db
 *.tmp
 *.temp
 scratch/
+
+# Local environment backups containing secrets
+server/.env.backup
