@@ -93,47 +93,96 @@ flowchart TD
   - 40/40 tests passing across 18 test suites.
 
 ### Phase 5: Product Catalog & Batch/Expiry Inventory Management
-- **Goals**: Comprehensive agro product categorization (seeds, fertilizers, pesticides, tools), batch number tracking, manufacturing/expiry date tracking, stock alerts.
-- **Deliverables**: Product CRUD APIs, Batch tracking with FIFO/FEFO (First-Expired-First-Out) logic, low-stock and near-expiry warning alerts.
+- **Status**: Completed & Verified
+- **Goals**: Comprehensive agro product categorization (seeds, fertilizers, pesticides, tools), batch number tracking, manufacturing/expiry date tracking, stock alerts, immutable ledger movements.
+- **Deliverables**:
+  - Category Controller & Routes (`/api/v1/categories`) with bilingual names, unique slugs, and parent category support.
+  - Product Controller & Routes (`/api/v1/products`) with SKU uniqueness, integer paise pricing, agricultural units, tax classifications (HSN & GST), and low-stock view.
+  - Inventory Controller & Routes (`/api/v1/inventory/receipt`, `/adjustment`, `/stock`, `/batches`, `/movements`) backed by immutable `StockMovement` ledger and FEFO batch sorting.
+  - Mongoose transaction helper (`withTransaction`) with seamless fallback for unsupported standalone MongoDB deployments.
+  - Prevention of duplicate stock receipts by reference ID and negative stock checks with mandatory audit reasoning.
+  - Responsive bilingual management frontend (`/admin/inventory`) with accessible tables, low-stock alerts, receipt/adjustment modals, and product details drawer.
+  - 71 automated tests across 28 suites passing with 100% success.
 - **Acceptance Criteria**:
   - Products linked to batches with individual expiry dates and purchase/selling prices.
   - Warning system flags batches expiring within 30, 60, or 90 days.
+  - Expired and quarantined batches strictly blocked from sale.
+  - Cashiers and Customers blocked from modifying stock, prices, or seeing supplier costs.
 
-### Phase 6: Customer Management & Credit Ledger (Khaata / Udhaari)
-- **Goals**: Farmer registration with village/Taluka address, Aadhaar/mobile identity, customer-wise debit/credit ledger, repayment tracking.
-- **Deliverables**: Customer profiles, immutable transaction ledger, balance recalculation triggers, statement of accounts.
+### Phase 6: Customer Management & Credit Ledger (Khaata / Udhaari) — [COMPLETED & VERIFIED]
+- **Status**: Completed & Verified (Prompt 7 Milestone)
+- **Goals**: Farmer registration with village/Taluka address, Aadhaar/mobile identity, customer-wise debit/credit ledger, repayment tracking, multi-invoice payment allocations, advances, aging buckets, and sandboxed passbook.
+- **Deliverables**:
+  - `CustomerLedgerEntry`: Immutable append-only schema capturing `OPENING_BALANCE`, `CREDIT_SALE`, `PAYMENT_RECEIVED`, `SALE_RETURN`, `CREDIT_NOTE`, `ADJUSTMENT`, and `REVERSAL`.
+  - Double-Entry Convention: DEBIT (नावे) increases farmer debt; CREDIT (जमा) decreases debt; net balance = $\sum(\text{Debits}) - \sum(\text{Credits})$. Integer paise stored throughout.
+  - Multi-Invoice Allocations (`PaymentAllocation`): Automatic FIFO or custom allocations across outstanding invoices with unallocated customer advances.
+  - Billing Integration: POS credit sales automatically post DEBIT entries and counter-downpayment CREDITS; invoice cancellations atomically post REVERSAL CREDITS and return stock.
+  - Customer Credit Profiles: Credit limit, available credit, overdue balance, last payment date, and aging buckets (0–30, 31–60, 61–90, 90+ days).
+  - Staff Credit Workspace (`/admin/credit`): Bilingual farmer list, passbook, payment collections, manual adjustments, opening balance migrations, reversals, and print statements.
+  - Farmer Self-Service Passbook (`/customer/dashboard`): Sandboxed access to live credit balance, passbook table, purchase bills, and printable statements.
+  - Reconciliation Engine: Audits consistency across invoices, payments, allocations, reversals, and credit limits without destructive silent repairs.
+  - 110 automated tests passing across 37 test suites.
 - **Acceptance Criteria**:
   - Every credit sale increments customer balance; every payment receipt decrements it.
-  - Immutable ledger entries with audit trail prevent balance manipulation.
+  - Direct balance editing strictly forbidden; corrections require authorized reversals with mandatory reasons.
+  - Customer self-access strictly sandboxed to authenticated phone number and shop ID.
+  - Multi-document ACID transactions with safe fallback.
 
-### Phase 7: Point-of-Sale (POS) Billing & Invoicing Engine
-- **Goals**: Fast counter billing interface for keyboard-first operation, barcode/search support, Cash/UPI/Credit/Split payment handling, printable tax invoice.
-- **Deliverables**: POS bill generation, stock deduction transaction, thermal & A4 invoice printing, WhatsApp bill sharing link.
+### Phase 8: Supplier Management & Stock Inward Purchases — [COMPLETED & VERIFIED]
+- **Status**: Completed & Verified (Prompt 8 Milestone)
+- **Goals**: Supplier directory, purchase bill entry (DRAFT vs RECEIVED), automatic batch creation & stock increment, accounts payable ledger, multi-invoice payment allocations, advances, purchase returns with stock guards, and reversals.
+- **Deliverables**:
+  - `Supplier`: Schema extended with contact person, villageCity, district, state, pincode, supplierType, payment terms, credit limits, bank details, and GSTIN format validator.
+  - `Purchase`: Model for inward purchase bills capturing supplier invoice #/date, line items with batch/lot numbers, manufacturing/expiry dates, purchase rates, discounts, intra/inter-state GST, freight charges, rounding, and status (`DRAFT`, `RECEIVED`, `CANCELLED`).
+  - `SupplierLedgerEntry`: Immutable append-only Accounts Payable ledger capturing `OPENING_BALANCE`, `PURCHASE_INVOICE`, `PAYMENT_MADE`, `PURCHASE_RETURN`, `DEBIT_NOTE`, `CREDIT_NOTE`, `ADJUSTMENT`, and `REVERSAL`.
+  - Double-Entry AP Convention: CREDIT (जमा) increases liability/payable; DEBIT (नावे) decreases payable; Net Payable = $\sum(\text{CREDITS}) - \sum(\text{DEBITS})$. All money stored in integer paise.
+  - Multi-Document ACID Transactions: Receiving inward bills atomically creates/updates `Batch` records, creates `StockMovement` records (`INWARD`), posts `PURCHASE_INVOICE` credit to supplier ledger, and records downpayments.
+  - Payment Allocations & Advances: Multi-purchase auto-FIFO and custom allocations across unpaid purchase bills, with unallocated amounts preserved as advance credit.
+  - Controlled Cancellation & Purchase Returns: Cancellations reverse stock via `RETURN_OUTWARD` and neutralize payable via `REVERSAL`. Returns strictly validate batch stock availability before decrementing inventory.
+  - Staff UI: Supplier directory & passbook drawer (`/admin/suppliers`), and Purchase Inward registry (`/admin/purchases`) with print-ready purchase vouchers.
+  - 126 automated tests passing across 45 test suites.
 - **Acceptance Criteria**:
-  - Atomic transaction: Inventory deducted only upon successful invoice creation.
-  - Credit portion automatically posted to customer ledger.
-  - Supports Marathi invoice headers and item descriptions.
+  - Inward stock updates batch inventory and preserves FEFO expiry tracking.
+  - Draft purchases do not alter stock or create payable liabilities until explicitly received.
+  - Immutable ledger prevents direct balance manipulation; corrections handled via audited reversals.
+  - Cashiers and Customers strictly blocked from viewing supplier purchase costs or managing suppliers.
 
-### Phase 8: Supplier Management & Stock Inward Purchases
-- **Goals**: Supplier ledger, purchase order recording, inward batch intake, supplier payment tracking.
-- **Deliverables**: Supplier directory, purchase bill entry, automatic stock increment, accounts payable ledger.
+### Phase 9: Financial Accounting, Expense Tracking & Profit/Loss Reports — [COMPLETED & VERIFIED]
+- **Status**: Completed & Verified (Prompt 9 Milestone)
+- **Goals**: Store daily operating expenses (rent, electricity, labor, transport), daily cash drawer reconciliation, expected vs counted cash, batch-based COGS, gross and operating profit calculation, receivables & payables summary, and inventory valuation.
+- **Deliverables**:
+  - `Expense`: Model for store operating expenditures with integer paise, categories (`RENT`, `ELECTRICITY`, `WATER`, `INTERNET_PHONE`, `SALARIES_WAGES`, `TRANSPORT_FUEL`, `MAINTENANCE`, `STATIONERY_PACKAGING`, `BANK_CHARGES`, `TEA_REFRESHMENT`, `MISCELLANEOUS`), payment modes (`CASH`, `UPI`, `BANK_TRANSFER`, `CHEQUE`), approval lifecycle (`DRAFT`, `PENDING_APPROVAL`, `APPROVED`, `REJECTED`, `REVERSED`), and append-only immutability hooks.
+  - `CashDrawerSession`: Model for physical cash drawer sessions, tracking opening cash float, live expected cash, actual counted cash at closing, cash variance, closing user, and mandatory explanation note. Enforces at most one open session per shop.
+  - Fund Segregation Engine (`cashbookUtils.js`): Authoritative aggregation of cash sales and credit collections versus cash expenses and supplier payments. Physical drawer cash is strictly segregated from digital UPI and bank transfer funds.
+  - Profitability & COGS Engine (`profitabilityUtils.js`): Calculates Cost of Goods Sold directly from batch purchase costs linked to actual batches sold (never from current selling price or period purchase totals). Computes Gross Profit, Gross Margin %, Operating Expenses, and Operating Net Profit %. Includes disclosures that estimates are managerial and not statutory audits.
+  - Financial Summary & Valuation: Outstanding customer receivables (Khata) and supplier payables (AP), plus physical stock inventory valuation derived from active batches.
+  - Admin Workspaces:
+    - `/admin/expenses`: Operating expense register, creation modal, approve/reject workflow, and audited reversals.
+    - `/admin/cashbook`: Physical cash drawer monitoring, live expected cash, open/close drawer session modals, and historical session logs.
+    - `/admin/daily-closing`: End-of-day cash reconciliation report, variance analysis, digital channels summary, and printable closing voucher.
+    - `/admin/reports`: Multi-tab financial reporting dashboard (Profitability & COGS, Sales & Revenue, Expenses Breakdown, Receivables & Payables, Inventory Valuation, print, and CSV export).
+  - 144 automated tests passing across 45 test suites.
 - **Acceptance Criteria**:
-  - Inward stock updates batch inventory and recalculates weighted or batch-specific purchase costs.
-  - Restricted strictly to Owner role.
+  - Operating expenses require integer paise and cannot be silently edited/deleted once approved.
+  - Physical drawer cash strictly excludes digital UPI / Bank transfer receipts.
+  - COGS calculated from verified batch purchase costs of items actually sold.
+  - Daily closing report compares expected cash with counted cash and detects discrepancies.
+  - Reports and closing workflows restricted to Owner and Manager. Cashier access strictly limited to operational drawer session submission and expense draft.
 
-### Phase 9: Financial Accounting, Expense Tracking & Profit/Loss Reports
-- **Goals**: Store daily operating expenses (rent, electricity, labor, transport), daily sales summary, gross and net profit calculation.
-- **Deliverables**: Expense tracker, daily cash drawer reconciliation, P&L dashboard with date-range filters.
+### Phase 10: Bilingual Marathi/English UI & Dual Portal Polish — [COMPLETED & VERIFIED]
+- **Status**: Completed & Verified (Prompt 10 Milestone)
+- **Goals**: End-to-end integration audit across workflows A through G, security and authorization verification, dual-portal role boundaries, offline error resilience, bundle optimization, and launch readiness checklist.
+- **Deliverables**:
+  - Full end-to-end audit test suite (`e2e_integration_audit.test.js` - 22 integration tests) covering product receiving, counter POS sale, farmer credit lifecycle, supplier payment FIFO allocation, returns/cancellations, expenses and drawer closing, and financial reports.
+  - Security hardening: customer token refresh customerId preservation, CORS idempotency preflight headers, cashier dashboard view restriction, supplier payment idempotency deduplication, and production JWT secret guards.
+  - Bilingual coverage verified across Marathi (`mr.json`) and English (`en.json`) dictionaries with no missing translation keys.
+  - Frontend bundle optimization: manual chunking for React, icons, and i18n reducing main bundle to 679 kB.
+  - 166 automated backend tests passing across 54 test suites with zero failures.
 - **Acceptance Criteria**:
-  - Profit reports accurately factor in purchase cost of goods sold (COGS) and recorded operational expenses.
-  - Visible only to Owner.
-
-### Phase 10: Bilingual Marathi/English UI & Dual Portal Polish
-- **Goals**: Seamless bilingual switching between Marathi and English across all forms, tables, and receipts. Refined dual-portal UX.
-- **Deliverables**: Complete `mr.json` and `en.json` dictionaries, customer self-service dashboard, mobile-responsive layout.
-- **Acceptance Criteria**:
-  - All agricultural terminology accurately translated into Marathi (खते, बियाणे, कीटकनाशके, शिल्लक रक्कम, पावती).
+  - All agricultural terminology accurately accessible in Marathi (खते, बियाणे, कीटकनाशके, शिल्लक रक्कम, पावती).
   - Customer portal clean, mobile-first, and strictly sandboxed to their own phone number/login.
+  - Cashier view strictly hides store finances, reports, supplier details, and closing analytics.
+  - Complete launch readiness audit and operational owner checklist documented.
 
 ### Phase 11: Production Hardening, Audit Logs & Automated Backups
 - **Goals**: Detailed audit logging of sensitive actions (price changes, manual stock adjustments, credit waivers), automated backup scripts, rate limiting, and security checks.

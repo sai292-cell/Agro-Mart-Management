@@ -98,5 +98,263 @@
     "tagline": "Empowering Maharashtra's Agricultural Commerce",
     "systemStatus": "System Health",
     "secureNote": "Protected by Role-Based Access Architecture"
+  },
+  "inventory": {
+    "title": "Product Catalog & Inventory Management",
+    "subtitle": "Real-time stock ledger, FEFO batch tracking, and agricultural catalog",
+    "backToDashboard": "Back to Dashboard",
+    "tabs": {
+      "products": "Product Catalog",
+      "batches": "Batches & Expiry (FEFO)",
+      "lowStock": "Low Stock Alerts",
+      "movements": "Stock Movement Ledger",
+      "categories": "Categories"
+    },
+    "kpis": {
+      "totalProducts": "Total Products",
+      "inStock": "In Stock",
+      "lowStockAlerts": "Low Stock Alerts",
+      "nearExpiry": "Expiring Soon (60d)",
+      "totalBatches": "Tracked Batches"
+    },
+    "actions": {
+      "addProduct": "Add New Product",
+      "receiveStock": "Receive Stock (Inward)",
+      "adjustStock": "Adjust Stock",
+      "addCategory": "Add Category",
+      "viewDetails": "View Details",
+      "edit": "Edit",
+      "activate": "Activate",
+      "deactivate": "Deactivate",
+      "refresh": "Refresh Data",
+      "save": "Save Changes",
+      "cancel": "Cancel",
+      "close": "Close"
+    },
+    "filters": {
+      "searchPlaceholder": "Search by product name, SKU, barcode, or brand...",
+      "allCategories": "All Categories",
+      "allTypes": "All Product Types",
+      "allStatuses": "All Statuses",
+      "activeOnly": "Active Only",
+      "inactiveOnly": "Inactive Only",
+      "lowStockOnly": "Low Stock Only"
+    },
+    "types": {
+      "SEED": "Seeds",
+      "FERTILIZER": "Fertilizers",
+      "PESTICIDE": "Pesticides",
+      "FUNGICIDE": "Fungicides",
+      "HERBICIDE": "Herbicides",
+      "EQUIPMENT": "Tools & Equipment",
+      "OTHER": "Other Supplies"
+    },
+    "units": {
+      "KG": "Kilogram (KG)",
+      "G": "Gram (G)",
+      "LITER": "Liter (L)",
+      "ML": "Milliliter (ML)",
+      "PIECE": "Piece",
+      "BAG": "Bag",
+      "PACK": "Pack"
+    },
+    "fields": {
+      "sku": "SKU Code",
+      "barcode": "Barcode",
+      "nameEn": "English Name",
+      "nameMr": "Marathi Name",
+      "category": "Category",
+      "brand": "Brand / Manufacturer",
+      "productType": "Product Type",
+      "baseUnit": "Base Unit",
+      "packSize": "Pack Size (in Base Units)",
+      "sellingPrice": "Selling Price (₹)",
+      "purchaseCost": "Purchase Cost (₹ per Base Unit)",
+      "reorderLevel": "Reorder Level (Base Units)",
+      "hsnCode": "HSN Code",
+      "gstRate": "GST Rate (%)",
+      "isExempt": "GST Exempt",
+      "batchNumber": "Batch Number",
+      "mfgDate": "Manufacturing Date",
+      "expiryDate": "Expiry Date",
+      "quantity": "Quantity (in Base Units)",
+      "reason": "Mandatory Reason / Note",
+      "referenceType": "Reference Type",
+      "referenceId": "Reference Document ID (Invoice #)",
+      "movementType": "Adjustment Type",
+      "allowNegative": "Approve Negative Stock Policy Override",
+      "status": "Status",
+      "currentStock": "Current Stock",
+      "deficit": "Stock Deficit",
+      "actions": "Actions"
+    },
+    "badges": {
+      "active": "Active",
+      "inactive": "Inactive",
+      "inStock": "In Stock",
+      "lowStock": "Low Stock",
+      "outOfStock": "Out of Stock",
+      "expired": "Expired",
+      "expiringSoon": "Expiring Soon",
+      "quarantined": "Quarantined"
+    },
+    "empty": {
+      "noProducts": "No products found matching your search or filters.",
+      "noBatches": "No batches recorded yet.",
+      "noLowStock": "Great! No products are currently below their reorder level.",
+      "noMovements": "No stock movements recorded yet.",
+      "noCategories": "No categories found. Create a category to start organizing products."
+    }
+  },
+  "pos": {
+    "title": "Point-of-Sale Billing & Invoice Counter",
+    "subtitle": "Fast counter billing with cash, UPI & farmer credit support",
+    "tabs": {
+      "counter": "POS Billing Counter",
+      "history": "Invoice History & Audit"
+    },
+    "customer": {
+      "heading": "Customer & Billing Type",
+      "walkIn": "Walk-in Customer",
+      "registered": "Registered Farmer (Khaata)",
+      "selectPlaceholder": "Select or search farmer by name, phone or village...",
+      "registerNew": "+ Quick Register Farmer",
+      "walkInName": "Customer Name (Optional)",
+      "walkInPhone": "Customer Phone (Optional)",
+      "village": "Village",
+      "creditLimit": "Credit Limit",
+      "currentCredit": "Credit Status"
+    },
+    "cart": {
+      "heading": "Active Cart Items",
+      "empty": "No items added yet. Click on products on the left or scan barcode to add.",
+      "product": "Product",
+      "batch": "FEFO Batch",
+      "rate": "Unit Rate (Inc. Tax)",
+      "qty": "Qty",
+      "total": "Line Total",
+      "subtotal": "Taxable Subtotal",
+      "cgst": "CGST (Intrastate 50%)",
+      "sgst": "SGST (Intrastate 50%)",
+      "taxTotal": "Total Tax (GST)",
+      "discount": "Bill Discount (₹)",
+      "roundOff": "Round-off",
+      "grandTotal": "Grand Total Due",
+      "itemCount": "items in cart"
+    },
+    "payment": {
+      "heading": "Payment Mode & Settlement",
+      "cash": "Cash",
+      "upi": "UPI / QR",
+      "credit": "Farmer Credit (Khaata)",
+      "split": "Split (Cash + UPI)",
+      "amountReceived": "Amount Received (₹)",
+      "upiReference": "UPI UTR / Reference ID",
+      "upiPlaceholder": "12-digit UTR or txn reference ID",
+      "cashAmount": "Cash Received (₹)",
+      "upiAmount": "UPI Received (₹)",
+      "balanceDue": "Remaining Outstanding Balance",
+      "creditAlert": "Outstanding amount will be debited to customer's credit ledger.",
+      "finalizeBtn": "Finalize Sale & Generate Tax Invoice",
+      "processing": "Processing Sale Atomically..."
+    },
+    "invoices": {
+      "invoiceNumber": "Invoice #",
+      "date": "Date & Time",
+      "customer": "Customer",
+      "grandTotal": "Grand Total",
+      "paid": "Paid",
+      "balance": "Balance Due",
+      "status": "Status",
+      "cashier": "Cashier",
+      "actions": "Actions",
+      "view": "View & Print Receipt",
+      "recordPayment": "Add Payment",
+      "cancel": "Cancel Invoice",
+      "searchPlaceholder": "Search by invoice number or customer name/phone...",
+      "noInvoices": "No invoices generated yet."
+    }
+  },
+  "credit": {
+    "title": "Farmer Credit Ledger & Khaata Management",
+    "subtitle": "Immutable financial accounting, digital passbooks & audit reconciliation",
+    "farmer": "Farmer",
+    "outstandingDebt": "Outstanding Debt",
+    "creditLimit": "Credit Limit",
+    "availableCredit": "Available Credit",
+    "collectPayment": "Collect Payment",
+    "statement": "Passbook Statement",
+    "adjustment": "Adjustment",
+    "openingBalance": "Opening Balance",
+    "debit": "Debit (नावे)",
+    "credit": "Credit (जमा)",
+    "runningBalance": "Running Balance",
+    "reversal": "Reverse Entry",
+    "reconcile": "Reconciliation Report"
+  },
+  "supplier": {
+    "title": "Supplier Management & Accounts Payable",
+    "subtitle": "Distributor accounts, payment settlements & AP passbooks",
+    "suppliers": "Suppliers",
+    "addSupplier": "Register Supplier",
+    "editSupplier": "Edit Supplier",
+    "recordPayment": "Pay Supplier",
+    "statement": "Supplier Passbook Statement",
+    "adjustment": "Supplier Adjustment",
+    "openingBalance": "Opening Balance Migration",
+    "reconcile": "Reconciliation Report",
+    "payableBalance": "Payable Balance",
+    "advancePaid": "Advance Paid",
+    "creditTerms": "Credit Terms (Days)"
+  },
+  "purchase": {
+    "title": "Purchase Inward & Stock Receipts",
+    "subtitle": "Inward supplier bills, batch receipts & stock increments",
+    "newBill": "New Purchase Inward",
+    "billNumber": "Purchase Bill #",
+    "supplierInvoice": "Supplier Invoice #",
+    "inwardDate": "Inward Date",
+    "grandTotal": "Grand Total",
+    "paid": "Paid Amount",
+    "balance": "Balance Payable",
+    "receiveDraft": "Receive Inward Stock",
+    "returnItems": "Purchase Return",
+    "cancelBill": "Cancel Purchase Bill"
+  },
+  "expense": {
+    "title": "Operating Expenses",
+    "subtitle": "Record, approve and audit store expenditures",
+    "recordExpense": "Record Expense",
+    "categories": "Expense Categories",
+    "approved": "Approved",
+    "pending": "Pending Approval",
+    "rejected": "Rejected",
+    "reversed": "Reversed"
+  },
+  "cashbook": {
+    "title": "Cashbook & Drawer",
+    "subtitle": "Physical drawer tracking, expected vs counted cash, and variance",
+    "openDrawer": "Open Drawer Session",
+    "closeDrawer": "Close Drawer Session",
+    "openingFloat": "Opening Cash Float",
+    "expectedCash": "Expected Drawer Cash",
+    "countedCash": "Actual Counted Cash",
+    "variance": "Cash Variance"
+  },
+  "dailyClosing": {
+    "title": "Daily Closing & Reconciliation",
+    "subtitle": "End-of-day audit, reconciliation and voucher printing",
+    "printReport": "Print Closing Report"
+  },
+  "reports": {
+    "title": "Profitability & Financial Reports",
+    "subtitle": "Batch-based COGS, gross margin, operating profit, and valuation",
+    "cogs": "Cost of Goods Sold (COGS)",
+    "grossProfit": "Gross Profit",
+    "operatingProfit": "Operating Net Profit",
+    "exportCsv": "Export CSV"
   }
 }
+
+
+

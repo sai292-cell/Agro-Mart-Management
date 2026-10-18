@@ -98,5 +98,263 @@
     "tagline": "महाराष्ट्रातील शेतकरी आणि कृषी व्यवसायाचे सक्षमीकरण",
     "systemStatus": "प्रणाली आरोग्य",
     "secureNote": "सुरक्षित व नियंत्रित डेटाबेस आर्किटेक्चरद्वारे संरक्षित"
+  },
+  "inventory": {
+    "title": "उत्पादन सूची आणि इन्व्हेंटरी व्यवस्थापन",
+    "subtitle": "रिअल-टाइम स्टॉक नोंदवही, बॅच एक्सपायरी ट्रॅकिंग आणि कृषी कॅटलॉग",
+    "backToDashboard": "डॅशबोर्डवर परत जा",
+    "tabs": {
+      "products": "उत्पादन सूची (कॅटलॉग)",
+      "batches": "बॅच व एक्सपायरी (FEFO)",
+      "lowStock": "कमी स्टॉक सूचना (Alerts)",
+      "movements": "स्टॉक हालचाल नोंदवही (Ledger)",
+      "categories": "कॅटेगरी (वर्ग)"
+    },
+    "kpis": {
+      "totalProducts": "एकूण उत्पादने",
+      "inStock": "स्टॉकमध्ये उपलब्ध",
+      "lowStockAlerts": "कमी स्टॉक सूचना",
+      "nearExpiry": "लवकर मुदत संपणारे (६० दिवस)",
+      "totalBatches": "सक्रिय बॅचेस"
+    },
+    "actions": {
+      "addProduct": "नवीन उत्पादन जोडा",
+      "receiveStock": "स्टॉक आवक (Inward) नोंदवा",
+      "adjustStock": "स्टॉक समायोजन (Adjustment)",
+      "addCategory": "नवीन कॅटेगरी जोडा",
+      "viewDetails": "तपशील पहा",
+      "edit": "बदल करा",
+      "activate": "सक्रिय करा",
+      "deactivate": "निष्क्रिय करा",
+      "refresh": "माहिती रिफ्रेश करा",
+      "save": "बदल जतन करा",
+      "cancel": "रद्द करा",
+      "close": "बंद करा"
+    },
+    "filters": {
+      "searchPlaceholder": "नाव, SKU, बारकोड किंवा ब्रँडद्वारे शोधा...",
+      "allCategories": "सर्व कॅटेगरीज",
+      "allTypes": "सर्व प्रकार",
+      "allStatuses": "सर्व स्थिती",
+      "activeOnly": "केवळ सक्रिय",
+      "inactiveOnly": "केवळ निष्क्रिय",
+      "lowStockOnly": "केवळ कमी स्टॉक"
+    },
+    "types": {
+      "SEED": "बियाणे",
+      "FERTILIZER": "खते",
+      "PESTICIDE": "कीटकनाशके",
+      "FUNGICIDE": "बुरशीनाशके",
+      "HERBICIDE": "तणनाशके",
+      "EQUIPMENT": "कृषी अवजारे व साधने",
+      "OTHER": "इतर साहित्य"
+    },
+    "units": {
+      "KG": "किलोग्रॅम (KG)",
+      "G": "ग्रॅम (G)",
+      "LITER": "लिटर (L)",
+      "ML": "मिली (ML)",
+      "PIECE": "नग (Piece)",
+      "BAG": "गोणी (Bag)",
+      "PACK": "पॅक (Pack)"
+    },
+    "fields": {
+      "sku": "SKU कोड",
+      "barcode": "बारकोड",
+      "nameEn": "इंग्रजी नाव",
+      "nameMr": "मराठी नाव",
+      "category": "कॅटेगरी",
+      "brand": "कंपनी / ब्रँड",
+      "productType": "उत्पादनाचा प्रकार",
+      "baseUnit": "मूळ युनिट",
+      "packSize": "पॅक आकार (मूळ युनिटनुसार)",
+      "sellingPrice": "विक्री किंमत (₹)",
+      "purchaseCost": "खरेदी किंमत (₹ प्रति मूळ युनिट)",
+      "reorderLevel": "पुनर्खरेदी पातळी (Reorder Level)",
+      "hsnCode": "HSN कोड",
+      "gstRate": "GST दर (%)",
+      "isExempt": "GST सूट (करमुक्त)",
+      "batchNumber": "बॅच नंबर",
+      "mfgDate": "उत्पादन तारीख (Mfg Date)",
+      "expiryDate": "मुदत संपण्याची तारीख (Expiry Date)",
+      "quantity": "प्रमाण (मूळ युनिटमध्ये)",
+      "reason": "अनिवार्य कारण / नोंद",
+      "referenceType": "संदर्भ प्रकार",
+      "referenceId": "बिल / पावती क्रमांक",
+      "movementType": "समायोजन प्रकार",
+      "allowNegative": "निगेटिव्ह स्टॉक मंजुरी ओव्हरराइड",
+      "status": "स्थिती",
+      "currentStock": "सध्याचा स्टॉक",
+      "deficit": "तुटवडा प्रमाण",
+      "actions": "कृती"
+    },
+    "badges": {
+      "active": "सक्रिय",
+      "inactive": "बंद",
+      "inStock": "स्टॉकमध्ये आहे",
+      "lowStock": "कमी स्टॉक",
+      "outOfStock": "स्टॉक संपला",
+      "expired": "मुदत संपली",
+      "expiringSoon": "लवकर संपणार",
+      "quarantined": "क्वारंटाईन (राखून ठेवलेले)"
+    },
+    "empty": {
+      "noProducts": "शोध निकषांशी जुळणारे कोणतेही उत्पादन आढळले नाही.",
+      "noBatches": "अजून कोणतीही बॅच नोंदवलेली नाही.",
+      "noLowStock": "उत्तम! सध्या कोणत्याही मालाचा स्टॉक पुनर्खरेदी पातळीपेक्षा कमी नाही.",
+      "noMovements": "अजून कोणतीही स्टॉक हालचाल नोंदवलेली नाही.",
+      "noCategories": "कोणतीही कॅटेगरी आढळली नाही. उत्पादने मांडण्यासाठी पहिली कॅटेगरी जोडा."
+    }
+  },
+  "pos": {
+    "title": "काउंटर विक्री व जीएसटी बिलिंग (POS)",
+    "subtitle": "रोख, UPI आणि शेतकरी उधारीसाठी जलद व अचूक बिलिंग प्रणाली",
+    "tabs": {
+      "counter": "काउंटर बिलिंग (POS)",
+      "history": "बिलांचा इतिहास व ऑडिट"
+    },
+    "customer": {
+      "heading": "ग्राहक व बिलिंग प्रकार",
+      "walkIn": "सामान्य ग्राहक (Walk-in)",
+      "registered": "नोंदणीकृत शेतकरी (खातेदार)",
+      "selectPlaceholder": "नाव, फोन किंवा गावावरून शेतकरी शोधा...",
+      "registerNew": "+ नवीन शेतकरी नोंदणी",
+      "walkInName": "ग्राहकाचे नाव (ऐच्छिक)",
+      "walkInPhone": "ग्राहकाचा फोन (ऐच्छिक)",
+      "village": "गाव",
+      "creditLimit": "उधारी मर्यादा",
+      "currentCredit": "उधारी स्थिती"
+    },
+    "cart": {
+      "heading": "खरेदी कार्टमधील उत्पादने",
+      "empty": "कार्ट रिकामी आहे. उत्पादने जोडण्यासाठी डाव्या बाजूला क्लिक करा किंवा बारकोड स्कॅन करा.",
+      "product": "उत्पादन",
+      "batch": "FEFO बॅच",
+      "rate": "दर (कर समाविष्ट)",
+      "qty": "नग / प्रमाण",
+      "total": "एकूण रक्कम",
+      "subtotal": "करपात्र रक्कम",
+      "cgst": "CGST (महाराष्ट्र ५०%)",
+      "sgst": "SGST (महाराष्ट्र ५०%)",
+      "taxTotal": "एकूण जीएसटी कर",
+      "discount": "बिलावरील सूट (₹)",
+      "roundOff": "राउंड-ऑफ",
+      "grandTotal": "एकूण देय रक्कम",
+      "itemCount": "उत्पादने कार्टमध्ये"
+    },
+    "payment": {
+      "heading": "पेमेंट पद्धत व जमा रक्कम",
+      "cash": "रोख (Cash)",
+      "upi": "UPI / QR कोड",
+      "credit": "शेतकरी उधारी (खाते)",
+      "split": "मिश्र (रोख + UPI)",
+      "amountReceived": "जमा रक्कम (₹)",
+      "upiReference": "UPI UTR / संदर्भ क्रमांक",
+      "upiPlaceholder": "१२-अंकी UTR किंवा व्यवहार आयडी",
+      "cashAmount": "रोख जमा (₹)",
+      "upiAmount": "UPI जमा (₹)",
+      "balanceDue": "उर्वरित बाकी रक्कम",
+      "creditAlert": "उर्वरित बाकी रक्कम ग्राहकाच्या उधारी खात्यावर नोंदवली जाईल.",
+      "finalizeBtn": "बिल पूर्ण करा व कर पावती तयार करा",
+      "processing": "बिल प्रक्रिया सुरू आहे..."
+    },
+    "invoices": {
+      "invoiceNumber": "बिल क्रमांक",
+      "date": "तारीख व वेळ",
+      "customer": "ग्राहक",
+      "grandTotal": "एकूण रक्कम",
+      "paid": "जमा",
+      "balance": "बाकी रक्कम",
+      "status": "स्थिती",
+      "cashier": "कॅशियर",
+      "actions": "कृती",
+      "view": "पावती पहा व छापा",
+      "recordPayment": "बाकी रक्कम जमा करा",
+      "cancel": "बिल रद्द करा",
+      "searchPlaceholder": "बिल नंबर किंवा ग्राहकाच्या नावाने शोधा...",
+      "noInvoices": "अजून कोणतीही बिले तयार केलेली नाहीत."
+    }
+  },
+  "credit": {
+    "title": "शेतकरी खातेवही व उधारी व्यवस्थापन",
+    "subtitle": "अपरिवर्तनीय आर्थिक हिशोब, डिजिटल पासबुक व खाते पडताळणी",
+    "farmer": "शेतकरी",
+    "outstandingDebt": "चालू बाकी उधारी",
+    "creditLimit": "मंजूर उधारी मर्यादा",
+    "availableCredit": "उपलब्ध उधारी",
+    "collectPayment": "उधारी जमा करा",
+    "statement": "पासबुक विवरण",
+    "adjustment": "समायोजन",
+    "openingBalance": "आरंभीची शिल्लक",
+    "debit": "नावे (Debit)",
+    "credit": "जमा (Credit)",
+    "runningBalance": "चालू शिल्लक",
+    "reversal": "नोंद उलटवा",
+    "reconcile": "पडताळणी अहवाल"
+  },
+  "supplier": {
+    "title": "पुरवठादार व्यवस्थापन व देणी खातेवही",
+    "subtitle": "कंपनी वितरक, देयके, हिशोब व देणी पासबुक",
+    "suppliers": "पुरवठादार",
+    "addSupplier": "नवीन पुरवठादार नोंद",
+    "editSupplier": "पुरवठादार संपादन",
+    "recordPayment": "पेमेंट नोंदवा",
+    "statement": "पुरवठादार खाते उतारा",
+    "adjustment": "समायोजन",
+    "openingBalance": "आरंभीची बाकी नोंद",
+    "reconcile": "खाते मेळ पडताळणी",
+    "payableBalance": "देय बाकी",
+    "advancePaid": "अगाऊ जमा",
+    "creditTerms": "उधारी मुदत (दिवस)"
+  },
+  "purchase": {
+    "title": "खरेदी आवक व साठा पावती",
+    "subtitle": "पुरवठादारांकडून खरेदी माल, बॅच नोंद व साठा आवक",
+    "newBill": "नवीन खरेदी नोंद",
+    "billNumber": "खरेदी बिल क्रमांक",
+    "supplierInvoice": "पुरवठादार बिल क्रमांक",
+    "inwardDate": "आवक तारीख",
+    "grandTotal": "एकूण रक्कम",
+    "paid": "दिलेली रक्कम",
+    "balance": "देय बाकी",
+    "receiveDraft": "साठा स्वीकारा",
+    "returnItems": "खरेदी माल परत",
+    "cancelBill": "खरेदी बिल रद्द करा"
+  },
+  "expense": {
+    "title": "दुकान खर्च व्यवस्थापन",
+    "subtitle": "दैनंदिन खर्च नोंद, मंजुरी व लेखापरीक्षण",
+    "recordExpense": "नवीन खर्च नोंदवा",
+    "categories": "खर्च वर्गवारी",
+    "approved": "मंजूर",
+    "pending": "प्रलंबित",
+    "rejected": "नाकारलेले",
+    "reversed": "उलट नोंद"
+  },
+  "cashbook": {
+    "title": "दैनंदिन रोखवही (कॅश ड्रॉवर)",
+    "subtitle": "प्रत्यक्ष ड्रॉवर रोकड, अपेक्षित विरुद्ध मोजलेली रोकड आणि तफावत",
+    "openDrawer": "सत्र सुरू करा",
+    "closeDrawer": "सत्र बंद करा",
+    "openingFloat": "सुरुवातीची रोकड",
+    "expectedCash": "अपेक्षित रोकड",
+    "countedCash": "प्रत्यक्ष मोजलेली रोकड",
+    "variance": "रोकड तफावत"
+  },
+  "dailyClosing": {
+    "title": "दिवसअखेर ताळेबंद",
+    "subtitle": "दैनंदिन रोकड मेळ आणि लेखापरीक्षण पावती",
+    "printReport": "प्रिंट काढा"
+  },
+  "reports": {
+    "title": "नफा-तोटा व व्यवसाय अहवाल",
+    "subtitle": "बॅच खरेदी खर्च (COGS), नफा मार्जिन, देणी-घेणी आणि साठा मूल्य",
+    "cogs": "विकलेल्या मालाचा खर्च (COGS)",
+    "grossProfit": "एकूण नफा (Gross Profit)",
+    "operatingProfit": "निव्वळ कार्यचालन नफा",
+    "exportCsv": "CSV निर्यात"
   }
 }
+
+
+

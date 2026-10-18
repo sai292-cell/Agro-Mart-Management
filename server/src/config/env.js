@@ -40,6 +40,16 @@ if (parsedEnv.data.NODE_ENV === 'production' && parsedEnv.data.DEV_ALLOW_TEST_OT
   process.exit(1);
 }
 
+// In production, enforce that default JWT secrets are replaced with secure unique secrets
+if (parsedEnv.data.NODE_ENV === 'production') {
+  const defaultAccess = 'shivshree_agro_mart_default_jwt_access_secret_key_32_chars!';
+  const defaultRefresh = 'shivshree_agro_mart_default_jwt_refresh_secret_key_32_chars!';
+  if (parsedEnv.data.JWT_ACCESS_SECRET === defaultAccess || parsedEnv.data.JWT_REFRESH_SECRET === defaultRefresh) {
+    console.error('❌ FATAL: Default JWT secrets cannot be used in production environment. Configure unique JWT_ACCESS_SECRET and JWT_REFRESH_SECRET in your production environment.');
+    process.exit(1);
+  }
+}
+
 export const env = parsedEnv.data;
 
 /**

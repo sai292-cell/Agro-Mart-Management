@@ -1,5 +1,6 @@
 import { verifyAccessToken, formatSafeUser } from '../utils/tokenUtils.js';
 import { User } from '../models/User.js';
+import { Customer } from '../models/Customer.js';
 
 /**
  * Middleware: requireAuth
@@ -61,6 +62,11 @@ export async function requireAuth(req, res, next) {
     req.shopId = user.shopId;
     if (decoded.customerId) {
       req.user.customerId = decoded.customerId;
+    } else if (user.role === 'CUSTOMER') {
+      const linkedCust = await Customer.findOne({ linkedUserId: user._id, shopId: user.shopId }).select('_id');
+      if (linkedCust) {
+        req.user.customerId = linkedCust._id.toString();
+      }
     }
 
     next();

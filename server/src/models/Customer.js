@@ -81,6 +81,15 @@ const customerSchema = new Schema(
       type: Boolean,
       default: true,
     },
+    lastPaymentDate: {
+      type: Date,
+      default: null,
+    },
+    creditStatus: {
+      type: String,
+      enum: ['ACTIVE', 'OVERDUE', 'BLOCKED'],
+      default: 'ACTIVE',
+    },
   },
   {
     timestamps: true,

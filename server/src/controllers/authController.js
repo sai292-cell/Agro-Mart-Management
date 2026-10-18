@@ -181,10 +181,19 @@ export async function refresh(req, res, next) {
     storedToken.revokedAt = new Date();
     await storedToken.save();
 
+    // Preserve customer sandbox link for customer role
+    let userPayload = user;
+    if (user.role === 'CUSTOMER') {
+      const customer = await Customer.findOne({ linkedUserId: user._id, shopId: user.shopId });
+      if (customer) {
+        userPayload = { ...user.toObject(), customerId: customer._id };
+      }
+    }
+
     // Issue new access and refresh tokens
-    const newAccessToken = signAccessToken(user);
+    const newAccessToken = signAccessToken(userPayload);
     const newJti = crypto.randomUUID();
-    const newRawRefreshToken = signRefreshToken(user, newJti);
+    const newRawRefreshToken = signRefreshToken(userPayload, newJti);
     const newTokenHash = hashToken(newRawRefreshToken);
 
     await RefreshToken.create({
