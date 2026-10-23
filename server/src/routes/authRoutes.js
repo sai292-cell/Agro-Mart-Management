@@ -4,10 +4,11 @@ import {
   logout,
   refresh,
   getMe,
-  requestCustomerOtp,
-  verifyCustomerOtp,
+  registerCustomer,
+  customerLogin,
+  ownerResetCustomerPassword,
 } from '../controllers/authController.js';
-import { requireAuth } from '../middleware/authMiddleware.js';
+import { requireAuth, requireRole } from '../middleware/authMiddleware.js';
 import { authRateLimiter } from '../middleware/rateLimiter.js';
 import { requireDbReady } from '../middleware/dbReady.js';
 
@@ -26,8 +27,16 @@ router.post('/logout', logout);
 // Authenticated current user profile
 router.get('/me', requireAuth, getMe);
 
-// Customer phone OTP authentication
-router.post('/customer/login-request', authRateLimiter, requestCustomerOtp);
-router.post('/customer/verify-otp', authRateLimiter, verifyCustomerOtp);
+// Farmer Registration & ID/Password Authentication (Zero SMS OTP required)
+router.post('/customer/register', authRateLimiter, registerCustomer);
+router.post('/customer/login', authRateLimiter, customerLogin);
+
+// Owner/Manager authorized farmer password reset (₹0 Budget verified recovery)
+router.patch(
+  '/customer/:customerId/reset-password',
+  requireAuth,
+  requireRole('OWNER', 'MANAGER'),
+  ownerResetCustomerPassword
+);
 
 export default router;

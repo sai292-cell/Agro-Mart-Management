@@ -43,6 +43,12 @@ const userSchema = new Schema(
         message: 'Invalid phone number format',
       },
     },
+    farmerId: {
+      type: String,
+      trim: true,
+      uppercase: true,
+      maxlength: [50, 'Farmer ID cannot exceed 50 characters'],
+    },
     passwordHash: {
       type: String,
       select: false, // Never return password hash in regular queries
@@ -98,6 +104,14 @@ userSchema.index(
   {
     unique: true,
     partialFilterExpression: { phone: { $type: 'string' } },
+  }
+);
+
+userSchema.index(
+  { farmerId: 1 },
+  {
+    unique: true,
+    partialFilterExpression: { farmerId: { $type: 'string' } },
   }
 );
 

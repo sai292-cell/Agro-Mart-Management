@@ -98,21 +98,40 @@ describe('Foundational Mongoose Schemas Validation', () => {
       assert.equal(validErr, undefined);
       assert.equal(validUser.email, 'farmer.patil@example.com');
     });
+
+    it('should accept farmerId and trim/uppercase it on User model', async () => {
+      const user = new User({
+        shopId: dummyShopId,
+        name: 'Farmer Patil',
+        role: 'CUSTOMER',
+        farmerId: 'farm-2026-000001',
+      });
+      const err = await getValidationError(user);
+      assert.equal(err, undefined);
+      assert.equal(user.farmerId, 'FARM-2026-000001');
+    });
   });
 
   describe('Customer Model & Credit Limit', () => {
-    it('should validate customer with non-negative integer paise credit limit', async () => {
+    it('should validate customer with non-negative integer paise credit limit, farmerId, and Maharashtra state default', async () => {
       const customer = new Customer({
         shopId: dummyShopId,
         name: 'Ramesh Patil',
+        farmerId: 'farm-2026-000001',
         village: 'Rahata',
         taluka: 'Rahata',
         district: 'Ahmednagar',
         creditLimitPaise: 5000000, // ₹50,000
+        age: 38,
+        gender: 'MALE',
       });
       const err = await getValidationError(customer);
       assert.equal(err, undefined);
       assert.equal(customer.creditLimitPaise, 5000000);
+      assert.equal(customer.farmerId, 'FARM-2026-000001');
+      assert.equal(customer.state, 'Maharashtra');
+      assert.equal(customer.age, 38);
+      assert.equal(customer.gender, 'MALE');
     });
 
     it('should reject negative credit limit', async () => {
@@ -133,6 +152,18 @@ describe('Foundational Mongoose Schemas Validation', () => {
       });
       const err = await getValidationError(customer);
       assert.ok(err?.errors?.creditLimitPaise);
+    });
+
+    it('should reject invalid gender or age under 18', async () => {
+      const customer = new Customer({
+        shopId: dummyShopId,
+        name: 'Young Farmer',
+        age: 15, // Under 18
+        gender: 'INVALID_GENDER',
+      });
+      const err = await getValidationError(customer);
+      assert.ok(err?.errors?.age);
+      assert.ok(err?.errors?.gender);
     });
   });
 

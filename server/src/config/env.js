@@ -24,6 +24,13 @@ const envSchema = z.object({
 
   // Development-only testing helpers (Strictly forbidden in production)
   DEV_ALLOW_TEST_OTP: z.string().default('true').transform((val) => val === 'true'),
+
+  // SMS Gateway Configuration (Fast2SMS, Twilio, or Mock console)
+  SMS_PROVIDER: z.enum(['mock', 'fast2sms', 'twilio']).default('mock'),
+  FAST2SMS_API_KEY: z.string().optional().default(''),
+  TWILIO_ACCOUNT_SID: z.string().optional().default(''),
+  TWILIO_AUTH_TOKEN: z.string().optional().default(''),
+  TWILIO_FROM_PHONE: z.string().optional().default(''),
 });
 
 const parsedEnv = envSchema.safeParse(process.env);

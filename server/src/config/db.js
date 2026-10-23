@@ -4,14 +4,17 @@ import { env, sanitizeMongoUri } from './env.js';
 
 let isConnecting = false;
 
-// Configure reliable DNS resolvers to prevent Windows Node.js c-ares querySrv ETIMEOUT
+// Configure reliable DNS resolvers to prevent Windows Node.js c-ares querySrv ETIMEOUT / ECONNREFUSED
 try {
-  const currentServers = dns.getServers();
-  // If current DNS is a local subnet IP or empty, augment with Google/Cloudflare DNS for Atlas SRV resolution
-  dns.setServers([...new Set([...currentServers, '8.8.8.8', '1.1.1.1'])]);
+  const currentServers = dns.getServers() || [];
+  // Prioritize reliable public DNS (8.8.8.8, 1.1.1.1) to ensure Atlas SRV resolution succeeds on Windows
+  dns.setServers([...new Set(['8.8.8.8', '1.1.1.1', ...currentServers])]);
 } catch (dnsErr) {
   // If platform restricts setting DNS servers, continue with system defaults
 }
+
+// Direct replica set seed fallback if SRV resolution encounters local DNS failures on Windows
+const DIRECT_REPLICA_URI = 'mongodb://shivshree_agro_mart:Sai%401122@ac-ghnt80k-shard-00-00.kxglgqb.mongodb.net:27017,ac-ghnt80k-shard-00-01.kxglgqb.mongodb.net:27017,ac-ghnt80k-shard-00-02.kxglgqb.mongodb.net:27017/shivshree_agro_mart?ssl=true&replicaSet=atlas-ufcnc1-shard-0&authSource=admin&retryWrites=true&w=majority';
 
 /**
  * Maps Mongoose readyState number to human-readable status string
@@ -88,7 +91,18 @@ export async function connectToDatabase() {
     isConnecting = true;
     console.log(`🔌 Initializing database connection to: ${sanitizedUri}`);
 
-    await mongoose.connect(env.MONGODB_URI, mongooseOptions);
+    try {
+      await mongoose.connect(env.MONGODB_URI, mongooseOptions);
+    } catch (primaryErr) {
+      // If SRV lookup fails on Windows (querySrv ECONNREFUSED/ETIMEOUT), fallback to direct replica set nodes
+      if (primaryErr.message && (primaryErr.message.includes('querySrv') || primaryErr.message.includes('ENOTFOUND'))) {
+        console.warn('⚠️ Windows SRV lookup failed. Retrying via direct replica seed list...');
+        await mongoose.connect(DIRECT_REPLICA_URI, mongooseOptions);
+      } else {
+        throw primaryErr;
+      }
+    }
+
     isConnecting = false;
 
     console.log(`✅ MongoDB Atlas connected successfully [Database: ${mongoose.connection.name} on host ${mongoose.connection.host}]`);
@@ -128,5 +142,10 @@ mongoose.connection.on('reconnected', () => {
 
 mongoose.connection.on('error', (err) => {
   const safeMessage = err.message ? err.message.replace(/(mongodb(?:\+srv)?:\/\/[^:]+:)([^@]+)(@.+)/gi, '$1*****$3') : 'DB runtime error';
+  if (safeMessage.includes('SSL alert number 80') || safeMessage.includes('tlsv1 alert internal error')) {
+    console.error(`🔒 [MongoDB Atlas Firewall]: Connection aborted by Atlas (SSL Alert 80).`);
+    console.error(`👉 Action required: Whitelist your IP in MongoDB Atlas (Security -> Network Access -> Add 0.0.0.0/0).`);
+    return;
+  }
   console.error(`⚠️ MongoDB runtime error: ${safeMessage}`);
 });

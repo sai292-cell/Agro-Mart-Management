@@ -3,8 +3,8 @@ import {
   loginApi,
   refreshApi,
   logoutApi,
-  requestCustomerOtpApi,
-  verifyCustomerOtpApi,
+  customerRegisterApi,
+  customerLoginApi,
   getApiAccessToken,
   setApiAccessToken,
 } from '../services/api';
@@ -52,12 +52,12 @@ export function AuthProvider({ children }) {
     }
   };
 
-  const customerRequestOtp = async (phone) => {
-    return requestCustomerOtpApi(phone);
+  const customerRegister = async (formData) => {
+    return customerRegisterApi(formData);
   };
 
-  const customerVerifyOtp = async (phone, otp) => {
-    const data = await verifyCustomerOtpApi(phone, otp);
+  const customerLogin = async (farmerId, password) => {
+    const data = await customerLoginApi(farmerId, password);
     setUser(data.user);
     return data;
   };
@@ -71,8 +71,8 @@ export function AuthProvider({ children }) {
     isCustomer: user?.role === 'CUSTOMER',
     login,
     logout,
-    customerRequestOtp,
-    customerVerifyOtp,
+    customerRegister,
+    customerLogin,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -220,7 +220,10 @@ Before going live with real customers and suppliers at Shivshree Agro Mart:
 3. **MongoDB Replica Set Verification**:
    - Confirm your MongoDB cluster supports multi-document ACID transactions (MongoDB Atlas replica sets support transactions natively; standalone local instances do not).
 4. **Live SMS Gateway Integration**:
-   - To send live OTPs to farmers' mobile numbers, integrate an approved telecom SMS gateway (e.g., Fast2SMS, Twilio, or Gupshup) with DLT registration in India.
+   - The server includes a built-in SMS Gateway service (`server/src/services/smsService.js`).
+   - For delivery in India, configure Fast2SMS: set `SMS_PROVIDER=fast2sms` and `FAST2SMS_API_KEY=<your_key>` in `server/.env`.
+   - Alternatively, for international carrier delivery, configure Twilio: set `SMS_PROVIDER=twilio`, `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, and `TWILIO_FROM_PHONE`.
+   - In local development without an SMS key, the system runs in `mock` mode: OTPs are logged directly in the server console and displayed on screen with a 1-click auto-fill button.
 5. **Periodic Database Backup & Disaster Recovery**:
    - Schedule automated `mongodump` cron jobs or enable automated Atlas snapshots.
    - Test restoration procedure to a staging cluster at least once every quarter.

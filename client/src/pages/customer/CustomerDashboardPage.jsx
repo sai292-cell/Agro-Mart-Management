@@ -92,6 +92,10 @@ export default function CustomerDashboardPage() {
               </Badge>
             </div>
             <p className="text-xs text-slate-500 font-medium">
+              <span className="font-mono font-bold text-emerald-800">
+                {user?.farmerId || creditProfile?.farmerId ? `आयडी / ID: ${user?.farmerId || creditProfile?.farmerId}` : ''}
+              </span>
+              {(user?.farmerId || creditProfile?.farmerId) ? ' | ' : ''}
               नोंदणीकृत मोबाईल: {user?.phone || 'N/A'} {creditProfile?.village ? `| गाव: ${creditProfile.village}` : ''}
             </p>
           </div>
