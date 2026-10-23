@@ -143,22 +143,30 @@ export async function getMeApi() {
   return result.data?.user;
 }
 
-export async function requestCustomerOtpApi(phone) {
-  return apiFetch('/auth/customer/login-request', {
+export async function customerRegisterApi(formData) {
+  const result = await apiFetch('/auth/customer/register', {
     method: 'POST',
-    body: JSON.stringify({ phone }),
+    body: JSON.stringify(formData),
   });
+  return result;
 }
 
-export async function verifyCustomerOtpApi(phone, otp) {
-  const result = await apiFetch('/auth/customer/verify-otp', {
+export async function customerLoginApi(farmerId, password) {
+  const result = await apiFetch('/auth/customer/login', {
     method: 'POST',
-    body: JSON.stringify({ phone, otp }),
+    body: JSON.stringify({ farmerId, password }),
   });
   if (result.data?.accessToken) {
     setApiAccessToken(result.data.accessToken);
   }
   return result.data;
+}
+
+export async function ownerResetCustomerPasswordApi(customerId, newPassword, confirmNewPassword, reason) {
+  return apiFetch(`/auth/customer/${customerId}/reset-password`, {
+    method: 'PATCH',
+    body: JSON.stringify({ newPassword, confirmNewPassword, reason }),
+  });
 }
 
 // ==========================================

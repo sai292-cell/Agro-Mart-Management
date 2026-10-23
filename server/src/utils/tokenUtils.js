@@ -50,6 +50,7 @@ export function signAccessToken(user) {
     shopId: user.shopId ? user.shopId.toString() : user.shopId,
     role: user.role,
     name: user.name,
+    ...(user.farmerId && { farmerId: user.farmerId }),
     ...(user.customerId && { customerId: user.customerId.toString() }),
   };
 
@@ -140,6 +141,7 @@ export function formatSafeUser(user) {
     name: userObj.name,
     email: userObj.email || null,
     phone: userObj.phone || null,
+    farmerId: userObj.farmerId || null,
     role: userObj.role,
     active: userObj.active,
     emailVerified: userObj.emailVerified,

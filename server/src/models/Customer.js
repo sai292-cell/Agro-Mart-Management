@@ -61,6 +61,27 @@ const customerSchema = new Schema(
       },
       default: 'mr',
     },
+    farmerId: {
+      type: String,
+      trim: true,
+      uppercase: true,
+      maxlength: [50, 'Farmer ID cannot exceed 50 characters'],
+    },
+    state: {
+      type: String,
+      trim: true,
+      maxlength: [100, 'State cannot exceed 100 characters'],
+      default: 'Maharashtra',
+    },
+    age: {
+      type: Number,
+      min: [18, 'Age must be at least 18'],
+      max: [120, 'Age cannot exceed 120'],
+    },
+    gender: {
+      type: String,
+      enum: ['MALE', 'FEMALE', 'OTHER'],
+    },
     creditLimitPaise: {
       type: Number,
       required: [true, 'Credit limit in paise is required'],
@@ -101,5 +122,12 @@ const customerSchema = new Schema(
 customerSchema.index({ shopId: 1, phone: 1 });
 customerSchema.index({ shopId: 1, village: 1 });
 customerSchema.index({ shopId: 1, name: 1 });
+customerSchema.index(
+  { shopId: 1, farmerId: 1 },
+  {
+    unique: true,
+    sparse: true,
+  }
+);
 
 export const Customer = mongoose.models.Customer || mongoose.model('Customer', customerSchema);

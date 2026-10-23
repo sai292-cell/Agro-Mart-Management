@@ -1,8 +1,12 @@
 import crypto from 'node:crypto';
 import { User } from '../models/User.js';
 import { Customer } from '../models/Customer.js';
+import { Shop } from '../models/Shop.js';
+import { Counter } from '../models/Counter.js';
+import { AuditLog } from '../models/AuditLog.js';
 import { RefreshToken } from '../models/RefreshToken.js';
 import { OtpVerification } from '../models/OtpVerification.js';
+import { sendOtpSms } from '../services/smsService.js';
 import {
   hashPassword,
   comparePassword,
@@ -15,6 +19,9 @@ import {
 } from '../utils/tokenUtils.js';
 import {
   loginSchema,
+  customerRegisterSchema,
+  customerPasswordLoginSchema,
+  ownerResetCustomerPasswordSchema,
   customerLoginRequestSchema,
   customerVerifyOtpSchema,
 } from '../validators/authValidators.js';
@@ -59,6 +66,17 @@ export async function login(req, res, next) {
 
     if (!user || !user.passwordHash) {
       return res.status(401).json({ success: false, error: GENERIC_AUTH_ERROR });
+    }
+
+    // Farmer accounts cannot access Owner & Staff portal
+    if (user.role === 'CUSTOMER') {
+      return res.status(403).json({
+        success: false,
+        error: {
+          code: 'PORTAL_ACCESS_DENIED',
+          message: 'Farmer accounts cannot access the Shop Owner & Staff portal. Please use the Farmer Portal.',
+        },
+      });
     }
 
     if (!user.active) {
@@ -269,64 +287,152 @@ export async function getMe(req, res) {
 }
 
 /**
- * POST /api/v1/auth/customer/login-request
- * Requests a short-lived one-time code for verified farmer login
+ * POST /api/v1/auth/customer/register
+ * Self-service registration for Farmers with collision-safe unique Farmer ID generation
  */
-export async function requestCustomerOtp(req, res, next) {
+export async function registerCustomer(req, res, next) {
   try {
-    const parseResult = customerLoginRequestSchema.safeParse(req.body);
+    const parseResult = customerRegisterSchema.safeParse(req.body);
     if (!parseResult.success) {
       return res.status(400).json({
         success: false,
         error: {
           code: 'VALIDATION_ERROR',
           message: parseResult.error.errors[0].message,
+          details: parseResult.error.flatten(),
         },
       });
     }
 
-    const { phone, shopId } = parseResult.data;
-    const cleanPhone = phone.trim();
+    const {
+      name,
+      phone,
+      email,
+      password,
+      village,
+      taluka,
+      district,
+      state = 'Maharashtra',
+      preferredLanguage = 'mr',
+      age,
+      gender,
+      shopId,
+    } = parseResult.data;
 
-    // Check if customer exists in Customer directory
-    const query = { phone: cleanPhone };
-    if (shopId) query.shopId = shopId;
+    const rawDigits = phone.replace(/\D/g, '');
+    const cleanPhone = rawDigits.length >= 10 ? rawDigits.slice(-10) : rawDigits;
+    const cleanEmail = email ? email.toLowerCase().trim() : null;
 
-    const customer = await Customer.findOne(query);
-
-    // Generic safe response to prevent phone number enumeration
-    if (!customer) {
-      return res.status(200).json({
-        success: true,
-        message: 'If your mobile number is registered with Shivshree Agro Mart, an OTP has been sent.',
+    // Resolve shop
+    let shop = shopId ? await Shop.findById(shopId) : await Shop.findOne();
+    if (!shop) {
+      shop = await Shop.create({
+        name: 'Shivshree Agro Mart',
+        displayName: 'Shivshree Agro Mart',
+        state: 'Maharashtra',
+        country: 'India',
       });
     }
 
-    // Generate 6-digit OTP
-    const rawOtp = env.DEV_ALLOW_TEST_OTP && env.NODE_ENV !== 'production'
-      ? '123456'
-      : crypto.randomInt(100000, 999999).toString();
-
-    const otpHash = await hashPassword(rawOtp);
-    const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
-
-    // Invalidate any previous pending OTPs for this phone
-    await OtpVerification.deleteMany({ phone: cleanPhone, shopId: customer.shopId });
-
-    await OtpVerification.create({
-      shopId: customer.shopId,
-      customerId: customer._id,
+    // Check for duplicate farmer account by phone within shop
+    const existingUserWithPhone = await User.findOne({
       phone: cleanPhone,
-      otpHash,
-      expiresAt,
+      shopId: shop._id,
+    });
+    if (existingUserWithPhone) {
+      return res.status(409).json({
+        success: false,
+        error: {
+          code: 'DUPLICATE_PHONE',
+          message: 'An account with this mobile number is already registered. Please sign in with your Farmer ID and password.',
+        },
+      });
+    }
+
+    // Check for duplicate account by email if provided
+    if (cleanEmail) {
+      const existingUserWithEmail = await User.findOne({
+        email: cleanEmail,
+        shopId: shop._id,
+      });
+      if (existingUserWithEmail) {
+        return res.status(409).json({
+          success: false,
+          error: {
+            code: 'DUPLICATE_EMAIL',
+            message: 'An account with this email address is already registered.',
+          },
+        });
+      }
+    }
+
+    // Generate collision-safe Farmer ID using atomic Counter
+    const year = new Date().getFullYear();
+    const seq = await Counter.getNextSequence(shop._id, `FARMER_${year}`);
+    const farmerId = `FARM-${year}-${String(seq).padStart(6, '0')}`;
+
+    // Hash password using project standard bcrypt (12 rounds)
+    const passwordHash = await hashPassword(password);
+
+    // Create User record with strictly CUSTOMER role
+    const user = await User.create({
+      shopId: shop._id,
+      name: name.trim(),
+      phone: cleanPhone,
+      email: cleanEmail || undefined,
+      farmerId,
+      passwordHash,
+      role: 'CUSTOMER',
+      active: true,
+      phoneVerified: false,
+      emailVerified: false,
     });
 
-    return res.status(200).json({
+    // Link or create corresponding Customer record to maintain financial relationship integrity
+    let customer = await Customer.findOne({ phone: cleanPhone, shopId: shop._id });
+    if (customer) {
+      customer.linkedUserId = user._id;
+      customer.farmerId = farmerId;
+      customer.name = name.trim();
+      customer.village = village.trim();
+      customer.taluka = taluka.trim();
+      customer.district = district.trim();
+      customer.state = state.trim();
+      customer.preferredLanguage = preferredLanguage;
+      if (age !== undefined && age !== null) customer.age = age;
+      if (gender) customer.gender = gender;
+      await customer.save();
+    } else {
+      customer = await Customer.create({
+        shopId: shop._id,
+        name: name.trim(),
+        phone: cleanPhone,
+        farmerId,
+        village: village.trim(),
+        taluka: taluka.trim(),
+        district: district.trim(),
+        state: state.trim(),
+        preferredLanguage,
+        age: age || undefined,
+        gender: gender || undefined,
+        creditLimitPaise: 0,
+        linkedUserId: user._id,
+        active: true,
+      });
+    }
+
+    return res.status(201).json({
       success: true,
-      message: 'OTP sent successfully to registered mobile number.',
-      ...(env.DEV_ALLOW_TEST_OTP && env.NODE_ENV !== 'production' && {
-        devNotice: 'Development mode active. Test OTP is: 123456',
-      }),
+      message: 'Farmer account registered successfully. Please save your Farmer ID.',
+      data: {
+        farmerId,
+        name: user.name,
+        phone: user.phone,
+        village: customer.village,
+        taluka: customer.taluka,
+        district: customer.district,
+        preferredLanguage: customer.preferredLanguage,
+      },
     });
   } catch (err) {
     next(err);
@@ -334,116 +440,91 @@ export async function requestCustomerOtp(req, res, next) {
 }
 
 /**
- * POST /api/v1/auth/customer/verify-otp
- * Verifies customer OTP and issues sandboxed customer tokens
+ * POST /api/v1/auth/customer/login
+ * Farmer ID and Password authentication (No OTP required)
  */
-export async function verifyCustomerOtp(req, res, next) {
+export async function customerLogin(req, res, next) {
   try {
-    const parseResult = customerVerifyOtpSchema.safeParse(req.body);
+    const parseResult = customerPasswordLoginSchema.safeParse(req.body);
     if (!parseResult.success) {
       return res.status(400).json({
         success: false,
         error: {
           code: 'VALIDATION_ERROR',
           message: parseResult.error.errors[0].message,
+          details: parseResult.error.flatten(),
         },
       });
     }
 
-    const { phone, otp, shopId } = parseResult.data;
-    const cleanPhone = phone.trim();
+    const { farmerId, password, shopId } = parseResult.data;
+    const cleanFarmerId = farmerId.trim().toUpperCase();
 
-    const query = { phone: cleanPhone };
-    if (shopId) query.shopId = shopId;
+    const GENERIC_FARMER_AUTH_ERROR = {
+      code: 'INVALID_CREDENTIALS',
+      message: 'Invalid Farmer ID or password.',
+    };
 
-    const verificationRecord = await OtpVerification.findOne({
-      ...query,
-      expiresAt: { $gt: new Date() },
-    });
+    const query = { farmerId: cleanFarmerId, role: 'CUSTOMER' };
+    if (shopId) {
+      query.shopId = shopId;
+    }
 
-    if (!verificationRecord) {
-      return res.status(400).json({
+    // Explicitly query passwordHash which is hidden by default in User schema
+    const user = await User.findOne(query).select('+passwordHash');
+    if (!user || !user.passwordHash) {
+      return res.status(401).json({ success: false, error: GENERIC_FARMER_AUTH_ERROR });
+    }
+
+    if (!user.active) {
+      return res.status(403).json({
         success: false,
         error: {
-          code: 'OTP_EXPIRED_OR_INVALID',
-          message: 'The OTP has expired or was not requested. Please request a new code.',
+          code: 'ACCOUNT_DEACTIVATED',
+          message: 'Your farmer account has been deactivated. Please contact Shivshree Agro Mart counter.',
         },
       });
     }
 
-    // Check attempts limit
-    if (verificationRecord.attempts >= 3) {
-      await OtpVerification.deleteOne({ _id: verificationRecord._id });
-      return res.status(429).json({
-        success: false,
-        error: {
-          code: 'MAX_ATTEMPTS_EXCEEDED',
-          message: 'Maximum OTP verification attempts exceeded. Please request a new code.',
-        },
-      });
+    const passwordMatch = await comparePassword(password, user.passwordHash);
+    if (!passwordMatch) {
+      return res.status(401).json({ success: false, error: GENERIC_FARMER_AUTH_ERROR });
     }
 
-    const isMatch = await comparePassword(otp, verificationRecord.otpHash);
-    if (!isMatch) {
-      verificationRecord.attempts += 1;
-      await verificationRecord.save();
-      return res.status(400).json({
-        success: false,
-        error: {
-          code: 'INVALID_OTP',
-          message: 'Invalid verification code. Please check and try again.',
-        },
-      });
+    // Retrieve linked customer profile
+    let customer = await Customer.findOne({ linkedUserId: user._id, shopId: user.shopId });
+    if (!customer) {
+      customer = await Customer.findOne({ farmerId: user.farmerId, shopId: user.shopId });
+      if (customer && !customer.linkedUserId) {
+        customer.linkedUserId = user._id;
+        await customer.save();
+      }
     }
 
-    // Look up customer
-    const customer = await Customer.findById(verificationRecord.customerId);
-    if (!customer || !customer.active) {
-      return res.status(400).json({
-        success: false,
-        error: {
-          code: 'CUSTOMER_NOT_FOUND',
-          message: 'Customer profile not found or inactive.',
-        },
-      });
-    }
-
-    // Ensure customer has a linked User account with CUSTOMER role
-    let user = customer.linkedUserId
-      ? await User.findById(customer.linkedUserId)
-      : null;
-
-    if (!user) {
-      user = await User.create({
-        shopId: customer.shopId,
-        name: customer.name,
-        phone: cleanPhone,
-        role: 'CUSTOMER', // Strictly enforced on backend
-        phoneVerified: true,
-        active: true,
-      });
-
-      customer.linkedUserId = user._id;
-      await customer.save();
-    }
-
-    // Clean up OTP record
-    await OtpVerification.deleteOne({ _id: verificationRecord._id });
-
-    // Issue tokens with customerId attached
-    const userPayload = { ...user.toObject(), customerId: customer._id };
+    // Issue signed tokens strictly with sandboxed customerId
+    const userPayload = {
+      ...user.toObject(),
+      farmerId: user.farmerId,
+      customerId: customer?._id,
+    };
     const accessToken = signAccessToken(userPayload);
     const jti = crypto.randomUUID();
     const rawRefreshToken = signRefreshToken(userPayload, jti);
 
+    const tokenHash = hashToken(rawRefreshToken);
+    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
+
     await RefreshToken.create({
       userId: user._id,
       shopId: user.shopId,
-      tokenHash: hashToken(rawRefreshToken),
-      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      tokenHash,
+      expiresAt,
       ipAddress: req.ip || '',
       userAgent: req.headers['user-agent'] || '',
     });
+
+    user.lastLoginAt = new Date();
+    await user.save();
 
     res.cookie('refreshToken', rawRefreshToken, getRefreshTokenCookieOptions());
 
@@ -453,9 +534,95 @@ export async function verifyCustomerOtp(req, res, next) {
         accessToken,
         user: {
           ...formatSafeUser(user),
-          customerId: customer._id.toString(),
+          farmerId: user.farmerId,
+          customerId: customer?._id ? customer._id.toString() : null,
         },
       },
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * PATCH /api/v1/auth/customer/:customerId/reset-password
+ * Owner/Manager authorized password reset for a farmer after identity verification
+ */
+export async function ownerResetCustomerPassword(req, res, next) {
+  try {
+    const parseResult = ownerResetCustomerPasswordSchema.safeParse(req.body);
+    if (!parseResult.success) {
+      return res.status(400).json({
+        success: false,
+        error: {
+          code: 'VALIDATION_ERROR',
+          message: parseResult.error.errors[0].message,
+          details: parseResult.error.flatten(),
+        },
+      });
+    }
+
+    const { customerId } = req.params;
+    const { newPassword, reason } = parseResult.data;
+
+    const customer = await Customer.findById(customerId);
+    if (!customer) {
+      return res.status(404).json({
+        success: false,
+        error: {
+          code: 'CUSTOMER_NOT_FOUND',
+          message: 'Customer record not found.',
+        },
+      });
+    }
+
+    let user = null;
+    if (customer.linkedUserId) {
+      user = await User.findById(customer.linkedUserId);
+    } else if (customer.farmerId) {
+      user = await User.findOne({ farmerId: customer.farmerId, role: 'CUSTOMER' });
+    } else if (customer.phone) {
+      user = await User.findOne({ phone: customer.phone, shopId: customer.shopId, role: 'CUSTOMER' });
+    }
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        error: {
+          code: 'USER_ACCOUNT_NOT_FOUND',
+          message: 'No login account is associated with this customer profile.',
+        },
+      });
+    }
+
+    const newHash = await hashPassword(newPassword);
+    user.passwordHash = newHash;
+    await user.save();
+
+    // Invalidate existing sessions for this user so they must sign in with new password
+    await RefreshToken.updateMany(
+      { userId: user._id, revokedAt: null },
+      { revokedAt: new Date() }
+    );
+
+    // Audit log entry for security tracking (Never log passwords)
+    await AuditLog.create({
+      shopId: customer.shopId,
+      actorUserId: req.user?.id || req.userId,
+      action: 'CUSTOMER_PASSWORD_RESET_BY_OWNER',
+      entityType: 'CUSTOMER',
+      entityId: customer._id.toString(),
+      reason: reason || 'Owner-verified in-person identity password reset',
+      metadata: {
+        customerName: customer.name,
+        phone: customer.phone,
+        farmerId: customer.farmerId || user.farmerId,
+      },
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: 'Farmer password has been reset successfully.',
     });
   } catch (err) {
     next(err);

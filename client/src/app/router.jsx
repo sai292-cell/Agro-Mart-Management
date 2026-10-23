@@ -4,6 +4,7 @@ import RootLayout from '../layouts/RootLayout';
 import HomePage from '../pages/HomePage';
 import OwnerLoginPage from '../pages/OwnerLoginPage';
 import CustomerLoginPage from '../pages/CustomerLoginPage';
+import CustomerRegisterPage from '../pages/CustomerRegisterPage';
 import AdminDashboardPage from '../pages/admin/AdminDashboardPage';
 import InventoryDashboardPage from '../pages/admin/InventoryDashboardPage';
 import PosBillingPage from '../pages/admin/PosBillingPage';
@@ -34,6 +35,10 @@ export const router = createBrowserRouter([
       {
         path: 'customer/login',
         element: <CustomerLoginPage />,
+      },
+      {
+        path: 'customer/register',
+        element: <CustomerRegisterPage />,
       },
       {
         path: 'admin/dashboard',
